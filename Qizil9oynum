@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ER Boutik – Qızıl 9 Oyunu</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #6c5ce7, #00cec9);
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 32px;
+      font-weight: bold;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 90px);
+      gap: 12px;
+      justify-content: center;
+    }
+    .box {
+      background: #fdcb6e;
+      border-radius: 14px;
+      height: 90px;
+      width: 90px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #2d3436;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+      position: relative;
+      user-select: none;
+      transition: background 0.3s ease;
+    }
+    .box:hover {
+      background: #ffeaa7;
+    }
+    .box.opened {
+      background: #00b894;
+      color: white;
+      font-size: 13px;
+      pointer-events: none;
+    }
+    .selected-label {
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: red;
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 12px;
+      font-weight: bold;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 16px;
+    }
+    #whatsapp-link {
+      margin-top: 10px;
+      font-size: 15px;
+    }
+    #whatsapp-link a {
+      color: #fff;
+      text-decoration: underline;
+      font-weight: bold;
+    }
+    #player-count {
+      margin-top: 30px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.8);
+    }
+    #rules-toggle {
+      margin-top: 30px;
+      background: #0984e3;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      color: white;
+      cursor: pointer;
+      user-select: none;
+    }
+    #rules-toggle:hover {
+      background: #74b9ff;
+    }
+    #rules-content {
+      max-width: 360px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      margin-top: 15px;
+      padding: 15px 20px;
+      font-size: 14px;
+      color: #f0f0f0;
+      line-height: 1.5;
+      display: none;
+      text-align: left;
+    }
+    footer {
+      margin-top: auto;
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      padding-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🎉 ER Boutik – Qızıl 9 Oyunu</h1>
+
+<div class="grid" id="grid"></div>
+
+<div id="result"></div>
+<div id="whatsapp-link"></div>
+<div id="player-count"></div>
+
+<button id="rules-toggle">Oyunun Qaydaları</button>
+<div id="rules-content">
+  <p>
+    📌 Bu oyunda hər kəs gündə 1 dəfə oynaya bilər.<br><br>
+    ✅ Seçdiyiniz qutuda hansı hədiyyə və ya endirim çıxsa, ekran görüntüsünü (screenshot) çəkərək bizə WhatsApp vasitəsilə göndərin.<br><br>
+    🛍️ Qazandığınız endirim və ya hədiyyə yalnız həmin gün üçün keçərlidir.<br><br>
+    🚚 Endirim yalnız ER Boutik-dən sifariş zamanı tətbiq olunur. Çatdırılma mümkündür.<br><br>
+    📲 Əlaqə və sifariş üçün: <a href="https://wa.me/994708175500" target="_blank" style="color:#ffd700;">0708175500</a><br><br>
+    🤝 Seçdiyiniz qutunun üzərində "Sizin seçiminiz" yazısı görünəcək. Bu, ekran görüntüsündə sübut kimi çıxacaq.
+  </p>
+</div>
+
+<footer>by: ARIO</footer>
+
+<script>
+  const grid = document.getElementById("grid");
+  const resultDiv = document.getElementById("result");
+  const whatsappDiv = document.getElementById("whatsapp-link");
+  const playerCountDiv = document.getElementById("player-count");
+
+  const rulesToggle = document.getElementById("rules-toggle");
+  const rulesContent = document.getElementById("rules-content");
+
+  const selectableRewards = [
+    "10% Endirim",
+    "20% Endirim",
+    "30% Endirim",
+    "50% Endirim",
+    "🛍️ Bir Al – Bir Hədiyyə Qazan",
+    "10% Endirim",
+    "20% Endirim",
+    "30% Endirim"
+  ];
+
+  let hasPlayed = false;
+
+  const playerMessages = [
+    "Oyunda 89 nəfər var",
+    "Oyunda 60 nəfər var",
+    "Oyunda 17 nəfər var",
+    "Oyunda 42 nəfər var",
+    "Oyunda 33 nəfər var"
+  ];
+
+  function createBoxes() {
+    for(let i = 0; i < 9; i++) {
+      const box = document.createElement("div");
+      box.className = "box";
+      box.textContent = "🎁";
+      box.dataset.index = i;
+      box.addEventListener("click", handleClick);
+      grid.appendChild(box);
+    }
+    const randomMsg = playerMessages[Math.floor(Math.random() * playerMessages.length)];
+    playerCountDiv.textContent = randomMsg;
+  }
+
+  function handleClick(e) {
+    if (hasPlayed) return;
+    hasPlayed = true;
+
+    const selectedBox = e.currentTarget;
+    const boxes = document.querySelectorAll(".box");
+
+    const realReward = selectableRewards[Math.floor(Math.random() * selectableRewards.length)];
+    selectedBox.textContent = realReward;
+    selectedBox.classList.add("opened");
+
+    // "Sizin seçiminiz" yazısı əlavə et
+    const label = document.createElement("div");
+    label.className = "selected-label";
+    label.textContent = "Sizin seçiminiz";
+    selectedBox.appendChild(label);
+
+    resultDiv.innerHTML = `✅ Sən qazandın: <strong>${realReward}</strong>`;
+    whatsappDiv.innerHTML = `📲 Screenshot çək və <a href="https://wa.me/994708175500" target="_blank">WhatsApp</a>-la göndər!`;
+
+    boxes.forEach(box => box.removeEventListener("click", handleClick));
+
+    setTimeout(() => {
+      boxes.forEach(box => {
+        if (!box.classList.contains("opened")) {
+          const reward = selectableRewards[Math.floor(Math.random() * selectableRewards.length)];
+          box.textContent = reward;
+          box.classList.add("opened");
+        }
+      });
+    }, 2000);
+  }
+
+  rulesToggle.addEventListener("click", () => {
+    if (rulesContent.style.display === "none" || rulesContent.style.display === "") {
+      rulesContent.style.display = "block";
+      rulesToggle.textContent = "Qaydaları Bağla";
+    } else {
+      rulesContent.style.display = "none";
+      rulesToggle.textContent = "Oyunun Qaydaları";
+    }
+  });
+
+  window.onload = createBoxes;
+</script>
+
+</body>
+</html>
